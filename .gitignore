@@ -1,0 +1,11 @@
+###> ide ###
+.idea
+###< ide ###
+
+###> custom caches ###
+.phpunit.result.cache
+###< custom caches ###
+
+###> vendors ###
+/vendor
+###< vendors ###

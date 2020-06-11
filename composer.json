@@ -1,0 +1,38 @@
+{
+    "name": "gzhegow/facader",
+    "description": "Static facades generator",
+    "type": "library",
+    "authors": [
+        {
+            "name": "gzhegow",
+            "email": "6562680@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.3",
+        
+        "nette/php-generator": "^3.4"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "4.*",
+        "phpunit/phpunit": "8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gzhegow\\Facader\\": "src/gzhegow/Facader"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Gzhegow\\Facader\\": "src/gzhegow/Facader",
+            "Tests\\": "tests/"
+        },
+        "files": [
+            "config/symfony.var-dumper.php",
+            
+            "helpers/dd.php"
+        ]
+    }
+}
