@@ -17,6 +17,7 @@ use Tests\Builder as Builder1;
 use Tests\Builder as Builder2;
 use Tests\Factory;
 use Tests\Factory as Factory1;
+use Tests\SecondaryService;
 use Tests\Service;
 use Tests\Service as Service1;
 use Tests\ServiceInterface;
@@ -53,6 +54,14 @@ class Facade
     public static function newObject(): StdClass
     {
         return static::getFactory()->newObject();
+    }
+
+    /**
+     * @return SecondaryService
+     */
+    public static function getSecondaryService()
+    {
+        return static::getService()->getSecondaryService();
     }
 
     /**

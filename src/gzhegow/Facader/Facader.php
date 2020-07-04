@@ -271,6 +271,7 @@ class Facader
 	{
 		$result = [];
 
+		$namespace = $this->namespace($class);
 		$className = $this->className($class);
 
 		foreach ( $classType->getMethods() as $method ) {
@@ -278,6 +279,7 @@ class Facader
 			$method->setStatic();
 
 			// replace @return in PhpDoc
+			$commentReturnType = null;
 			if ($comment = $method->getComment()) {
 				$content = array_map("trim", explode("\n", $comment));
 
@@ -294,6 +296,14 @@ class Facader
 							|| ( $this->ends($after, '|' . $className) )
 						) {
 							$content[ $idx ] = '@return ' . $className . '|static';
+						} else {
+							$commentReturnType = null
+								?? ( class_exists($after)
+									? $after
+									: null )
+								?? ( class_exists($after = $namespace . '\\' . $after)
+									? $after
+									: null );
 						}
 					}
 				}
@@ -302,7 +312,7 @@ class Facader
 			}
 
 			// add use for return type
-			$returnType = $method->getReturnType();
+			$returnType = $method->getReturnType() ?? $commentReturnType;
 			if ($returnType && class_exists($returnType)) {
 				$this->appendUse($returnType);
 			}
@@ -357,6 +367,7 @@ class Facader
 
 		foreach ( $method->getParameters() as $param ) {
 			$paramType = $param->getType();
+
 			if ($paramType && class_exists($paramType)) {
 				$this->appendUse($paramType);
 			}

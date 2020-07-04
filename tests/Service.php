@@ -25,6 +25,15 @@ class Service implements ServiceInterface
 
 
 	/**
+	 * @return SecondaryService
+	 */
+	public function getSecondaryService()
+	{
+		return new SecondaryService();
+	}
+
+
+	/**
 	 * @param \StdClass $stdClass
 	 *
 	 * @return string
