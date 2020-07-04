@@ -10,16 +10,10 @@ namespace Facades;
 
 use App;
 use StdClass;
-use StdClass as StdClass1;
-use StdClass as StdClass2;
 use Tests\Builder;
-use Tests\Builder as Builder1;
-use Tests\Builder as Builder2;
 use Tests\Factory;
-use Tests\Factory as Factory1;
 use Tests\SecondaryService;
 use Tests\Service;
-use Tests\Service as Service1;
 use Tests\ServiceInterface;
 
 class Facade

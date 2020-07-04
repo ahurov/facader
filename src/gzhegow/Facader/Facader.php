@@ -27,6 +27,10 @@ class Facader
 	 * @var array
 	 */
 	protected $usesIndex = [];
+	/**
+	 * @var array
+	 */
+	protected $usesCounter = [];
 
 
 	/**
@@ -458,13 +462,21 @@ class Facader
 			$as = array_pop($array);
 		}
 
-		if (isset($this->usesIndex[ $as ])) {
-			$i = ++$this->usesIndex[ $as ];
+		$existingUses = $this->usesIndex[ $as ] ?? null;
+
+		if ($existingUses) {
+			if (! isset($existingUses[ $use ])) {
+				++$this->usesCounter[ $as ];
+			}
 
 		} else {
-			$i = $this->usesIndex[ $as ] = 0;
+			$this->usesCounter[ $as ] = 0;
 
 		}
+
+		$this->usesIndex[ $as ][ $use ] = true;
+
+		$i = $this->usesCounter[ $as ];
 
 		return $i;
 	}
