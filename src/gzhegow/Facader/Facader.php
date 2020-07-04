@@ -495,7 +495,8 @@ class Facader
 		$namespace = explode('\\', $class);
 
 		$class = array_pop($namespace);
-		$namespace = implode('\\', $namespace);
+		$namespace = ltrim(implode('\\', $namespace), '\\');
+
 		$path = $this->normalize($namespace);
 
 		return [
