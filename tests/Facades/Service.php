@@ -3,7 +3,8 @@
 /**
  * This file is auto-generated.
  *
- * @noinspection PhpUnhandledExceptionInspection
+ * * @noinspection PhpUnhandledExceptionInspection
+ * * @noinspection PhpDocMissingThrowsInspection
  */
 
 namespace Facades;
@@ -30,6 +31,62 @@ class Service
     public static function getPropertyFrom(\StdClass $stdClass)
     {
         return static::getService()->getPropertyFrom($stdClass);
+    }
+
+    /**
+     * @return _Service
+     */
+    public static function doActionThis()
+    {
+        return static::getService()->doActionThis();
+    }
+
+    /**
+     * @return _Service
+     */
+    public static function doActionSelf()
+    {
+        return static::getService()->doActionSelf();
+    }
+
+    /**
+     * @return _Service
+     */
+    public static function doActionStatic()
+    {
+        return static::getService()->doActionStatic();
+    }
+
+    /**
+     * @return _Service
+     */
+    public static function doActionClassName()
+    {
+        return static::getService()->doActionClassName();
+    }
+
+    /**
+     * @return _Service
+     */
+    public static function doActionInterfaceName()
+    {
+        return static::getService()->doActionInterfaceName();
+    }
+
+    /**
+     * @return mixed|_Service
+     */
+    public static function doActionBeginsClassName()
+    {
+        return static::getService()->doActionBeginsClassName();
+    }
+
+    /**
+     * @return _Service|mixed
+     */
+    public static function doActionEndsInterfaceName()
+    {
+        return static::getService()->doActionEndsInterfaceName();
     }
 
     /**

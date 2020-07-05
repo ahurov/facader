@@ -42,4 +42,61 @@ class Service implements ServiceInterface
 	{
 		return (string) $stdClass->option;
 	}
+
+
+	/**
+	 * @return $this
+	 */
+	public function doActionThis()
+	{
+		return $this;
+	}
+
+	/**
+	 * @return self
+	 */
+	public function doActionSelf()
+	{
+		return $this;
+	}
+
+	/**
+	 * @return static
+	 */
+	public function doActionStatic()
+	{
+		return $this;
+	}
+
+	/**
+	 * @return Service
+	 */
+	public function doActionClassName()
+	{
+		return $this;
+	}
+
+	/**
+	 * @return Service
+	 */
+	public function doActionInterfaceName()
+	{
+		return $this;
+	}
+
+	/**
+	 * @return Service|mixed
+	 */
+	public function doActionBeginsClassName()
+	{
+		return $this;
+	}
+
+	/**
+	 * @return mixed|Service
+	 */
+	public function doActionEndsInterfaceName()
+	{
+		return $this;
+	}
 }

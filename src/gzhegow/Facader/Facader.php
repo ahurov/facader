@@ -155,7 +155,8 @@ class Facader
 			$file->addComment(implode(PHP_EOL, [
 				'This file is auto-generated.',
 				'',
-				'@noinspection PhpUnhandledExceptionInspection',
+				'* @noinspection PhpUnhandledExceptionInspection',
+				'* @noinspection PhpDocMissingThrowsInspection',
 			]));
 
 			// create namespace
@@ -168,6 +169,10 @@ class Facader
 
 			// merge methods
 			foreach ( $fromArray as $idx => $fromClass ) {
+				$fromInterface = is_string($idx)
+					? $idx
+					: null;
+
 				$fromClassInstance = $this->newClassTypeFrom($fromClass);
 
 				// imports
@@ -202,7 +207,11 @@ class Facader
 				}
 
 				$facadeMethods = array_merge($facadeMethods,
-					$this->fetchMethods($fromClass, $fromClassInstance)
+					$this->fetchMethods($fromClassInstance,
+						$facadeClass,
+						$fromClass,
+						$fromInterface
+					)
 				);
 			}
 
@@ -280,17 +289,44 @@ class Facader
 
 
 	/**
-	 * @param string    $class
-	 * @param ClassType $classType
+	 * @param ClassType   $classType
+	 * @param string      $facadeClass
+	 * @param string      $class
+	 * @param string|null $interface
 	 *
 	 * @return array
 	 */
-	protected function fetchMethods(string $class, ClassType $classType) : array
+	protected function fetchMethods(ClassType $classType,
+		string $facadeClass,
+		string $class,
+		string $interface = null
+	) : array
 	{
 		$result = [];
 
 		$namespace = $this->namespace($class);
+
+		$facadeClassName = $this->className($facadeClass);
 		$className = $this->className($class);
+		$interfaceName = $interface
+			? $this->className($interface)
+			: null;
+
+		if ($interface) {
+			$fromAlias = null
+				?? ( ( $facadeClassName === $interfaceName )
+					? '_' . $facadeClassName
+					: null )
+				?? $interfaceName;
+
+		} else {
+			$fromAlias = null
+				?? ( ( $facadeClassName === $className )
+					? '_' . $facadeClassName
+					: null )
+				?? $className;
+
+		}
 
 		foreach ( $classType->getMethods() as $method ) {
 			// replace methods visibility to static
@@ -305,15 +341,24 @@ class Facader
 					if ($after = $this->substr_after($line, '@return')) {
 						$after = trim($after);
 
+						$begins = null;
+						$ends = null;
 						if (0
 							|| ( $after === '$this' )
 							|| ( $after === 'self' )
 							|| ( $after === 'static' )
 							|| ( $after === $className )
-							|| ( $this->starts($after, $className . '|') )
-							|| ( $this->ends($after, '|' . $className) )
+							|| ( $begins = $this->starts($after, $className . '|') )
+							|| ( $ends = $this->ends($after, '|' . $className) )
 						) {
-							$content[ $idx ] = '@return ' . $className . '|static';
+							$content[ $idx ] = '@return '
+								. trim(''
+									. $begins . '|'
+									. $fromAlias
+									. '|' . $ends,
+									'|'
+								);
+
 						} else {
 							$commentReturnType = null
 								?? ( class_exists($after)
@@ -322,6 +367,7 @@ class Facader
 								?? ( class_exists($after = $namespace . '\\' . $after)
 									? $after
 									: null );
+
 						}
 					}
 				}

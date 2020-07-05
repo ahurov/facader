@@ -3,7 +3,8 @@
 /**
  * This file is auto-generated.
  *
- * @noinspection PhpUnhandledExceptionInspection
+ * * @noinspection PhpUnhandledExceptionInspection
+ * * @noinspection PhpDocMissingThrowsInspection
  */
 
 namespace Facades;
