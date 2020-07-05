@@ -1,10 +1,9 @@
 <?php
 
-namespace Tests;
-
+namespace Tests\Services;
 
 /**
- * Class Service
+ * Class ServiceInterface
  */
 interface ServiceInterface
 {

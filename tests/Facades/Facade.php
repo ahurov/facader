@@ -1,20 +1,18 @@
 <?php
 
 /**
- * @noinspection PhpUnhandledExceptionInspection
- *
  * This file is auto-generated.
+ *
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 namespace Facades;
 
-use App;
-use StdClass;
-use Tests\Builder;
-use Tests\Factory;
-use Tests\SecondaryService;
-use Tests\Service;
-use Tests\ServiceInterface;
+use Gzhegow\Di\Di;
+use Tests\Services\Builder;
+use Tests\Services\Factory;
+use Tests\Services\SecondaryService;
+use Tests\Services\ServiceInterface;
 
 class Facade
 {
@@ -29,7 +27,7 @@ class Facade
     /**
      * @return \StdClass
      */
-    public static function build(): StdClass
+    public static function build(): \StdClass
     {
         return static::getBuilder()->build();
     }
@@ -45,7 +43,7 @@ class Facade
     /**
      * @return \StdClass
      */
-    public static function newObject(): StdClass
+    public static function newObject(): \StdClass
     {
         return static::getFactory()->newObject();
     }
@@ -63,7 +61,7 @@ class Facade
      *
      * @return string
      */
-    public static function getPropertyFrom(StdClass $stdClass)
+    public static function getPropertyFrom(\StdClass $stdClass)
     {
         return static::getService()->getPropertyFrom($stdClass);
     }
@@ -73,7 +71,7 @@ class Facade
      */
     public static function getBuilder()
     {
-        return App::get(Builder::class);
+        return Di::makeOrFail(Builder::class);
     }
 
     /**
@@ -81,7 +79,7 @@ class Facade
      */
     public static function getFactory()
     {
-        return App::get(Factory::class);
+        return Di::makeOrFail(Factory::class);
     }
 
     /**
@@ -89,6 +87,6 @@ class Facade
      */
     public static function getService()
     {
-        return App::get(ServiceInterface::class);
+        return Di::makeOrFail(ServiceInterface::class);
     }
 }

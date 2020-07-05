@@ -139,10 +139,10 @@ class Facader
 			$this->usesIndex = [];
 
 			// import container
-			$this->appendUse($containerClass);
+			$this->putUse($containerClass);
 
 			// add facade class to index
-			$this->appendUsesIndex($facadeClass);
+			$this->putUseIndex($facadeClass);
 
 			[
 				'class'     => $facadeClassName,
@@ -150,13 +150,12 @@ class Facader
 				'path'      => $facadeNamespacePath,
 			] = $this->nsinfo($facadeClass);
 
-
 			// create php file
 			$file = $this->newPhpFile();
 			$file->addComment(implode(PHP_EOL, [
-				'@noinspection PhpUnhandledExceptionInspection',
-				'',
 				'This file is auto-generated.',
+				'',
+				'@noinspection PhpUnhandledExceptionInspection',
 			]));
 
 			// create namespace
@@ -166,14 +165,14 @@ class Facader
 			// parse sources
 			$facadeMethods = [];
 			$fromArray = (array) $from;
-			foreach ( $fromArray as $idx => $fromClass ) {
-				$this->appendUse($fromClass);
 
+			// merge methods
+			foreach ( $fromArray as $idx => $fromClass ) {
 				$fromClassInstance = $this->newClassTypeFrom($fromClass);
 
 				// imports
 				foreach ( $this->fetchUseStatements($fromClass) as $use ) {
-					$this->appendUse(...array_values($use));
+					$this->putUse(...array_values($use));
 				}
 
 				// remove magic methods
@@ -206,32 +205,47 @@ class Facader
 					$this->fetchMethods($fromClass, $fromClassInstance)
 				);
 			}
+
+			// copy methods
 			foreach ( $fromArray as $idx => $fromClass ) {
-				$this->appendUse($fromClass);
+				$fromClassName = $this->className($fromClass);
 
 				$fromInterface = is_string($idx)
 					? $idx
 					: null;
-
-				if ($fromInterface) {
-					$this->appendUse($fromInterface);
-				}
-
-				$fromClassName = $this->className($fromClass);
 				$fromInterfaceName = $fromInterface
 					? $this->className($fromInterface)
 					: null;
 
+				$fromUse = $fromInterface ?? $fromClass;
+
+				if ($fromInterface) {
+					$fromAlias = null
+						?? ( ( $facadeClassName === $fromInterfaceName )
+							? '_' . $facadeClassName
+							: null )
+						?? $fromInterfaceName;
+
+				} else {
+					$fromAlias = null
+						?? ( ( $facadeClassName === $fromClassName )
+							? '_' . $facadeClassName
+							: null )
+						?? $fromClassName;
+
+				}
+
+				$this->putUse($fromUse, $fromAlias);
+
 				// add facade accessor
-				$returnClassName = $fromInterfaceName ?? $fromClassName;
 				$facadeMethods[] = $method = ( new Method('get' . $fromClassName) )
 					->setPublic()
 					->setStatic()
-					->addComment('@return ' . $returnClassName)
+					->addComment('@return ' . $fromAlias)
 					->setBody(vsprintf('return %s::%s(%s::class);', [
 						$containerClassName,
 						$containerGetMethodName,
-						$returnClassName,
+						$fromAlias,
 					]));
 			}
 
@@ -318,7 +332,7 @@ class Facader
 			// add use for return type
 			$returnType = $method->getReturnType() ?? $commentReturnType;
 			if ($returnType && class_exists($returnType)) {
-				$this->appendUse($returnType);
+				$this->putUse($returnType);
 			}
 
 			// replace return command into expected
@@ -373,7 +387,7 @@ class Facader
 			$paramType = $param->getType();
 
 			if ($paramType && class_exists($paramType)) {
-				$this->appendUse($paramType);
+				$this->putUse($paramType);
 			}
 
 			try {
@@ -428,9 +442,9 @@ class Facader
 	 * @param string $use
 	 * @param null   $as
 	 *
-	 * @return void
+	 * @return string
 	 */
-	protected function appendUse(string $use, $as = null)
+	protected function putUse(string $use, $as = null) : string
 	{
 		if (! isset($as)) {
 			$array = explode('\\', $use);
@@ -438,23 +452,31 @@ class Facader
 			$as = array_pop($array);
 		}
 
-		$i = $this->appendUsesIndex($use, $as);
+		try {
+			$rc = new \ReflectionClass($use);
 
-		$this->uses[] = [
-			$use,
-			$as . ( $i
-				? $i
-				: '' ),
-		];
+			if (! $rc->isUserDefined()) {
+				return $as;
+			}
+		}
+		catch ( \ReflectionException $exception ) {
+			throw new \RuntimeException(null, null, $exception);
+		}
+
+		$as = $this->putUseIndex($use, $as);
+
+		$this->uses[] = [ $use, $as ];
+
+		return $as;
 	}
 
 	/**
 	 * @param string $use
 	 * @param null   $as
 	 *
-	 * @return int
+	 * @return string
 	 */
-	protected function appendUsesIndex(string $use, $as = null)
+	protected function putUseIndex(string $use, $as = null) : string
 	{
 		if (! isset($as)) {
 			$array = explode('\\', $use);
@@ -478,7 +500,11 @@ class Facader
 
 		$i = $this->usesCounter[ $as ];
 
-		return $i;
+		$result = $as . ( $i
+				? $i
+				: '' );
+
+		return $result;
 	}
 
 
