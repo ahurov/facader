@@ -310,7 +310,7 @@ class Facader
 	 */
 	public function service(string $serviceClass, ...$sources)
 	{
-		[ $classes, $interfaces ] = $this->php->kwparams(...$sources);
+		[ $interfaces, $classes ] = $this->php->kwparams(...$sources);
 
 		$this->newServiceGenerator($serviceClass, array_merge($classes, $interfaces))
 			->generate();
@@ -342,7 +342,7 @@ class Facader
 	 */
 	public function facade(string $containerClass, string $facadeClass, ...$sources)
 	{
-		[ $classes, $interfaces ] = $this->php->kwparams(...$sources);
+		[ $interfaces, $classes ] = $this->php->kwparams(...$sources);
 
 		$this->newFacadeGenerator($containerClass, $facadeClass, array_merge($classes, $interfaces))
 			->generate();

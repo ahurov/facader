@@ -11,12 +11,14 @@ use Gzhegow\Facader\Tests\Services\SecondaryServiceInterface;
 
 class SecondService
 {
-    /** * @var SecondaryServiceInterface econdaryErvice */
-    public $econdaryErvice;
+    /**
+     * * @var SecondaryServiceInterface secondaryService
+     */
+    protected $secondaryService;
 
-    public function __construct(SecondaryServiceInterface $econdaryErvice)
+    public function __construct(SecondaryServiceInterface $secondaryService)
     {
-        $this->econdaryErvice = $econdaryErvice;
+        $this->secondaryService = $secondaryService;
     }
 
     /**
@@ -26,6 +28,6 @@ class SecondService
      */
     public function getPropertyFrom(StdClass $stdClass)
     {
-        return $this->econdaryErvice->getPropertyFrom($stdClass);
+        return $this->secondaryService->getPropertyFrom($stdClass);
     }
 }

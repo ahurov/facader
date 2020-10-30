@@ -13,16 +13,28 @@ use Gzhegow\Facader\Tests\Services\Service;
 
 class ThirdService
 {
-    /** * @var SecondaryServiceInterface econdaryErvice */
-    public $econdaryErvice;
+    /**
+     * * @var Service service
+     */
+    protected $service;
 
-    /** * @var Service ervice */
-    public $ervice;
+    /**
+     * * @var SecondaryServiceInterface secondaryService
+     */
+    protected $secondaryService;
 
-    public function __construct(SecondaryServiceInterface $econdaryErvice, Service $ervice)
+    public function __construct(Service $service, SecondaryServiceInterface $secondaryService)
     {
-        $this->econdaryErvice = $econdaryErvice;
-        $this->ervice = $ervice;
+        $this->service = $service;
+        $this->secondaryService = $secondaryService;
+    }
+
+    /**
+     * @return SecondaryService
+     */
+    public function getSecondaryService()
+    {
+        return $this->service->getSecondaryService();
     }
 
     /**
@@ -32,15 +44,7 @@ class ThirdService
      */
     public function getPropertyFrom(StdClass $stdClass)
     {
-        return $this->ervice->getPropertyFrom($stdClass);
-    }
-
-    /**
-     * @return SecondaryService
-     */
-    public function getSecondaryService()
-    {
-        return $this->ervice->getSecondaryService();
+        return $this->secondaryService->getPropertyFrom($stdClass);
     }
 
     /**
@@ -48,7 +52,7 @@ class ThirdService
      */
     public function doActionThis()
     {
-        return $this->ervice->doActionThis();
+        return $this->service->doActionThis();
     }
 
     /**
@@ -56,7 +60,7 @@ class ThirdService
      */
     public function doActionSelf()
     {
-        return $this->ervice->doActionSelf();
+        return $this->service->doActionSelf();
     }
 
     /**
@@ -64,7 +68,7 @@ class ThirdService
      */
     public function doActionStatic()
     {
-        return $this->ervice->doActionStatic();
+        return $this->service->doActionStatic();
     }
 
     /**
@@ -72,7 +76,7 @@ class ThirdService
      */
     public function doActionClassName()
     {
-        return $this->ervice->doActionClassName();
+        return $this->service->doActionClassName();
     }
 
     /**
@@ -80,7 +84,7 @@ class ThirdService
      */
     public function doActionInterfaceName()
     {
-        return $this->ervice->doActionInterfaceName();
+        return $this->service->doActionInterfaceName();
     }
 
     /**
@@ -88,7 +92,7 @@ class ThirdService
      */
     public function doActionBeginsClassName()
     {
-        return $this->ervice->doActionBeginsClassName();
+        return $this->service->doActionBeginsClassName();
     }
 
     /**
@@ -96,6 +100,6 @@ class ThirdService
      */
     public function doActionEndsInterfaceName()
     {
-        return $this->ervice->doActionEndsInterfaceName();
+        return $this->service->doActionEndsInterfaceName();
     }
 }

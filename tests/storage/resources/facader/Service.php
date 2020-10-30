@@ -12,12 +12,14 @@ use Gzhegow\Facader\Tests\Services\Service as _Service;
 
 class Service
 {
-    /** * @var _Service ervice */
-    public $ervice;
+    /**
+     * * @var _Service service
+     */
+    protected $service;
 
-    public function __construct(_Service $ervice)
+    public function __construct(_Service $service)
     {
-        $this->ervice = $ervice;
+        $this->service = $service;
     }
 
     /**
@@ -25,7 +27,7 @@ class Service
      */
     public function getSecondaryService()
     {
-        return $this->ervice->getSecondaryService();
+        return $this->service->getSecondaryService();
     }
 
     /**
@@ -35,7 +37,7 @@ class Service
      */
     public function getPropertyFrom(StdClass $stdClass)
     {
-        return $this->ervice->getPropertyFrom($stdClass);
+        return $this->service->getPropertyFrom($stdClass);
     }
 
     /**
@@ -43,7 +45,7 @@ class Service
      */
     public function doActionThis()
     {
-        return $this->ervice->doActionThis();
+        return $this->service->doActionThis();
     }
 
     /**
@@ -51,7 +53,7 @@ class Service
      */
     public function doActionSelf()
     {
-        return $this->ervice->doActionSelf();
+        return $this->service->doActionSelf();
     }
 
     /**
@@ -59,7 +61,7 @@ class Service
      */
     public function doActionStatic()
     {
-        return $this->ervice->doActionStatic();
+        return $this->service->doActionStatic();
     }
 
     /**
@@ -67,7 +69,7 @@ class Service
      */
     public function doActionClassName()
     {
-        return $this->ervice->doActionClassName();
+        return $this->service->doActionClassName();
     }
 
     /**
@@ -75,7 +77,7 @@ class Service
      */
     public function doActionInterfaceName()
     {
-        return $this->ervice->doActionInterfaceName();
+        return $this->service->doActionInterfaceName();
     }
 
     /**
@@ -83,7 +85,7 @@ class Service
      */
     public function doActionBeginsClassName()
     {
-        return $this->ervice->doActionBeginsClassName();
+        return $this->service->doActionBeginsClassName();
     }
 
     /**
@@ -91,6 +93,6 @@ class Service
      */
     public function doActionEndsInterfaceName()
     {
-        return $this->ervice->doActionEndsInterfaceName();
+        return $this->service->doActionEndsInterfaceName();
     }
 }

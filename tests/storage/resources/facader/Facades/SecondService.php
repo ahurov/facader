@@ -27,7 +27,7 @@ class SecondService
     /**
      * @return SecondaryServiceInterface
      */
-    public static function getSecondaryService()
+    public static function getSecondaryService(): SecondaryServiceInterface
     {
         return Di::getInstance()->get(SecondaryServiceInterface::class);
     }

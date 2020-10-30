@@ -17,21 +17,21 @@ use Gzhegow\Facader\Tests\Services\Service;
 class ServiceFacade
 {
     /**
+     * @return SecondaryServiceInterface
+     */
+    public static function getSecondaryService(): SecondaryServiceInterface
+    {
+        return Di::getInstance()->get(SecondaryServiceInterface::class);
+    }
+
+    /**
      * @param \StdClass $stdClass
      *
      * @return string
      */
     public static function getPropertyFrom(\StdClass $stdClass)
     {
-        return static::getService()->getPropertyFrom($stdClass);
-    }
-
-    /**
-     * @return SecondaryServiceInterface
-     */
-    public static function getSecondaryService()
-    {
-        return Di::getInstance()->get(SecondaryServiceInterface::class);
+        return static::getSecondaryService()->getPropertyFrom($stdClass);
     }
 
     /**
@@ -93,7 +93,7 @@ class ServiceFacade
     /**
      * @return Service
      */
-    public static function getService()
+    public static function getService(): Service
     {
         return Di::getInstance()->get(Service::class);
     }

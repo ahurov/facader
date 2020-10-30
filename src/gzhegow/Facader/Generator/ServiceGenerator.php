@@ -110,7 +110,12 @@ class ServiceGenerator extends AbstractGenerator
 		// add new methods to facade class
 		foreach ( $constructorParameters as $constructorParameter ) {
 			$generatedClassType->addProperty($constructorParameter->getName())
-				->addComment(vsprintf('* @var %s %s', [ $constructorParameter->getType(), $constructorParameter->getName() ]));
+				->setProtected()
+				->addComment(implode(PHP_EOL, [
+					'',
+					vsprintf('* @var %s %s', [ $constructorParameter->getType(), $constructorParameter->getName() ]),
+					'',
+				]));
 		}
 		$generatedClassType->setMethods($movingMethods);
 

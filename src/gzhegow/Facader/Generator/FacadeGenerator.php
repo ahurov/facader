@@ -179,6 +179,7 @@ class FacadeGenerator extends AbstractGenerator
 			$facadeAccessor = ( $this->facader->newMethod('get' . $sourceClassName) )
 				->setPublic()
 				->setStatic()
+				->setReturnType($sourceUseClass)
 				->addComment('@return ' . $sourceUseAlias)
 				->setBody(vsprintf('return %s::getInstance()->get(%s::class);', [
 					$this->containerClassName,

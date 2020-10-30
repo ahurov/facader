@@ -92,7 +92,7 @@ class Service
     /**
      * @return _Service
      */
-    public static function getService()
+    public static function getService(): _Service
     {
         return Di::getInstance()->get(_Service::class);
     }
