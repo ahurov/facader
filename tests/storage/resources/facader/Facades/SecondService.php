@@ -10,9 +10,9 @@
 namespace Facades;
 
 use Gzhegow\Di\Di;
-use Tests\Services\SecondaryServiceInterface;
+use Gzhegow\Facader\Tests\Services\SecondaryServiceInterface;
 
-class SecondaryService
+class SecondService
 {
     /**
      * @param \StdClass $stdClass
@@ -29,6 +29,6 @@ class SecondaryService
      */
     public static function getSecondaryService()
     {
-        return Di::makeOrFail(SecondaryServiceInterface::class);
+        return Di::getInstance()->get(SecondaryServiceInterface::class);
     }
 }

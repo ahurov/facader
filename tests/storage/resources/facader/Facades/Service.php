@@ -10,10 +10,10 @@
 namespace Facades;
 
 use Gzhegow\Di\Di;
-use Tests\Services\SecondaryService;
-use Tests\Services\ServiceInterface as _ServiceInterface;
+use Gzhegow\Facader\Tests\Services\SecondaryService;
+use Gzhegow\Facader\Tests\Services\Service as _Service;
 
-class ServiceInterface
+class Service
 {
     /**
      * @return SecondaryService
@@ -34,7 +34,7 @@ class ServiceInterface
     }
 
     /**
-     * @return _ServiceInterface
+     * @return _Service
      */
     public static function doActionThis()
     {
@@ -42,7 +42,7 @@ class ServiceInterface
     }
 
     /**
-     * @return _ServiceInterface
+     * @return _Service
      */
     public static function doActionSelf()
     {
@@ -50,7 +50,7 @@ class ServiceInterface
     }
 
     /**
-     * @return _ServiceInterface
+     * @return _Service
      */
     public static function doActionStatic()
     {
@@ -58,7 +58,7 @@ class ServiceInterface
     }
 
     /**
-     * @return _ServiceInterface
+     * @return _Service
      */
     public static function doActionClassName()
     {
@@ -66,7 +66,7 @@ class ServiceInterface
     }
 
     /**
-     * @return _ServiceInterface
+     * @return _Service
      */
     public static function doActionInterfaceName()
     {
@@ -74,7 +74,7 @@ class ServiceInterface
     }
 
     /**
-     * @return mixed|_ServiceInterface
+     * @return mixed|_Service
      */
     public static function doActionBeginsClassName()
     {
@@ -82,7 +82,7 @@ class ServiceInterface
     }
 
     /**
-     * @return _ServiceInterface|mixed
+     * @return _Service|mixed
      */
     public static function doActionEndsInterfaceName()
     {
@@ -90,10 +90,10 @@ class ServiceInterface
     }
 
     /**
-     * @return _ServiceInterface
+     * @return _Service
      */
     public static function getService()
     {
-        return Di::makeOrFail(_ServiceInterface::class);
+        return Di::getInstance()->get(_Service::class);
     }
 }

@@ -11,6 +11,14 @@
     "repositories": [
         {
             "type": "vcs",
+            "url": "https://github.com/6562680/support"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/6562680/reflection"
+        },
+        {
+            "type": "vcs",
             "url": "https://github.com/6562680/di"
         }
     ],
@@ -19,12 +27,16 @@
     "require": {
         "php": "^7.3",
         
-        "nette/php-generator": "^3.4"
+        "nette/php-generator": "^3.4",
+        "psr/container": "^1.0"
     },
     "require-dev": {
-        "symfony/var-dumper": "4.*",
-        "phpunit/phpunit": "8",
-        "gzhegow/di": "^1.2"
+        "phpunit/phpunit": "^9.0",
+        
+        "symfony/var-dumper": "^4.0",
+        
+        "gzhegow/support": "^1.0",
+        "gzhegow/di": "^1.0"
     },
     "autoload": {
         "psr-4": {
@@ -33,13 +45,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Gzhegow\\Facader\\": "src/gzhegow/Facader",
-            "Tests\\": "tests/"
-        },
-        "files": [
-            "config/symfony.var-dumper.php",
-            
-            "helpers/dd.php"
-        ]
+            "Gzhegow\\Facader\\Tests\\": "tests/src"
+        }
     }
 }

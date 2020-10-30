@@ -2,12 +2,20 @@
 
 namespace Gzhegow\Facader;
 
+use Gzhegow\Support\Php;
+use Gzhegow\Support\Str;
+use Gzhegow\Support\Path;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\Parameter;
 use Nette\PhpGenerator\PsrPrinter;
+use Gzhegow\Reflection\Reflection;
 use Nette\PhpGenerator\PhpNamespace;
-use Gzhegow\Facader\Lib\Vendor\Zeronights\ExtendedReflectionClass;
+use Gzhegow\Facader\Generator\FacadeGenerator;
+use Gzhegow\Facader\Generator\ServiceGenerator;
+use Gzhegow\Facader\Exceptions\RuntimeException;
+use Gzhegow\Facader\Exceptions\Logic\InvalidArgumentException;
 
 /**
  * Class Facader
@@ -15,58 +23,148 @@ use Gzhegow\Facader\Lib\Vendor\Zeronights\ExtendedReflectionClass;
 class Facader
 {
 	/**
+	 * @var Path
+	 */
+	protected $path;
+	/**
+	 * @var Php
+	 */
+	protected $php;
+	/**
+	 * @var Str
+	 */
+	protected $str;
+	/**
+	 * @var Reflection
+	 */
+	protected $reflection;
+
+	/**
 	 * @var string
 	 */
-	protected $facadesRootPath;
+	protected $outputPath;
 
 	/**
 	 * @var array
 	 */
-	protected $uses = [];
+	protected $servicesConfig = [];
 	/**
 	 * @var array
 	 */
-	protected $usesIndex = [];
-	/**
-	 * @var array
-	 */
-	protected $usesCounter = [];
+	protected $facadesConfig = [];
 
 
 	/**
-	 * @return PsrPrinter
-	 */
-	protected function newPsrPrinter() : PsrPrinter
-	{
-		return new PsrPrinter();
-	}
-
-	/**
-	 * @return PhpFile
-	 */
-	protected function newPhpFile() : PhpFile
-	{
-		return new PhpFile();
-	}
-
-	/**
-	 * @param string $name
+	 * Constructor
 	 *
-	 * @return PhpNamespace
+	 * @param Path       $path
+	 * @param Php        $php
+	 * @param Str        $str
+	 * @param Reflection $reflection
+	 *
+	 * @param string     $outputPath
+	 * @param array      $config
 	 */
-	protected function newPhpNamespace(string $name) : PhpNamespace
+	public function __construct(
+		Path $path,
+		Php $php,
+		Str $str,
+		Reflection $reflection,
+
+		string $outputPath,
+		array $config = []
+	)
 	{
-		return new PhpNamespace($name);
+		$this->path = $path;
+		$this->php = $php;
+		$this->str = $str;
+		$this->reflection = $reflection;
+
+		$this->setOutputPath($outputPath);
+		$this->setConfig($config);
 	}
+
+
+	/**
+	 * @param string $containerClass
+	 * @param string $facadeClass
+	 * @param array  $sources
+	 *
+	 * @return FacadeGenerator
+	 */
+	public function newFacadeGenerator(string $containerClass, string $facadeClass, array $sources = []) : FacadeGenerator
+	{
+		return new FacadeGenerator(
+			$this->path,
+			$this->php,
+			$this->str,
+			$this->reflection,
+
+			$this,
+
+			$containerClass,
+			$facadeClass,
+			$sources
+		);
+	}
+
+	/**
+	 * @param string $serviceClass
+	 * @param array  $sources
+	 *
+	 * @return ServiceGenerator
+	 */
+	public function newServiceGenerator(string $serviceClass, array $sources = []) : ServiceGenerator
+	{
+		return new ServiceGenerator(
+			$this->path,
+			$this->php,
+			$this->str,
+			$this->reflection,
+
+			$this,
+
+			$serviceClass,
+			$sources
+		);
+	}
+
 
 	/**
 	 * @param string $class
 	 *
 	 * @return ClassType
 	 */
-	protected function newClassTypeFrom(string $class) : ClassType
+	public function newClassTypeFrom(string $class) : ClassType
 	{
 		return ClassType::from($class);
+	}
+
+
+	/**
+	 * @param string $namespace
+	 *
+	 * @return PhpNamespace
+	 */
+	public function newPhpNamespace(string $namespace) : PhpNamespace
+	{
+		return new PhpNamespace($namespace);
+	}
+
+	/**
+	 * @param string      $name
+	 *
+	 * @param string|null $namespace
+	 *
+	 * @return ClassType
+	 */
+	public function newClassType(string $name, $namespace = null) : ClassType
+	{
+		$namespace = is_string($namespace)
+			? $this->newPhpNamespace($namespace)
+			: $namespace;
+
+		return new ClassType($name, $namespace);
 	}
 
 	/**
@@ -74,214 +172,116 @@ class Facader
 	 *
 	 * @return Method
 	 */
-	protected function newMethod(string $name) : Method
+	public function newMethod(string $name) : Method
 	{
 		return new Method($name);
+	}
+
+	/**
+	 * @param string $name
+	 *
+	 * @return Parameter
+	 */
+	public function newParameter(string $name) : Parameter
+	{
+		return new Parameter($name);
+	}
+
+	/**
+	 * @return PhpFile
+	 */
+	public function newPhpFile() : PhpFile
+	{
+		return new PhpFile();
+	}
+
+	/**
+	 * @return PsrPrinter
+	 */
+	public function newPsrPrinter() : PsrPrinter
+	{
+		return new PsrPrinter();
 	}
 
 
 	/**
 	 * @return string
 	 */
-	public function getFacadesRootPath() : string
+	public function getOutputPath() : string
 	{
-		return $this->facadesRootPath;
-	}
-
-	/**
-	 * @param string $facadesRootPath
-	 */
-	public function setFacadesRootPath(string $facadesRootPath) : void
-	{
-		$this->facadesRootPath = $facadesRootPath;
+		return $this->outputPath;
 	}
 
 
 	/**
-	 * [
-	 *    'MyNamespace\Facades\Obj' => Obj::class,
+	 * @param string $outputPath
 	 *
-	 *    'MyNamespace\Facades\Obj' => [
-	 *        Obj::class,
-	 *    ],
-	 *
-	 *    'MyNamespace\Facades\Obj' => [
-	 *        Obj::class,
-	 *        Obj::class,
-	 *    ],
-	 *
-	 *    'MyNamespace\Facades\Obj' => [
-	 *        ObjInterface::class => Obj::class,
-	 *    ],
-	 *
-	 *    'MyNamespace\Facades\Obj' => [
-	 *        ObjInterface::class => Obj::class,
-	 *        ObjInterface::class => Obj::class,
-	 *    ],
-	 * ];
-	 *
-	 * @param string $containerClass
-	 * @param string $containerGetMethodName
-	 * @param array  $config
-	 *
-	 * @return $this
+	 * @return Facader
 	 */
-	public function generate(
-		string $containerClass,
-		string $containerGetMethodName,
-		array $config = []
-	)
+	public function setOutputPath(string $outputPath)
 	{
-		$containerClassName = $this->className($containerClass);
+		if ('' === $outputPath) {
+			throw new InvalidArgumentException('Path should be not empty');
+		}
 
-		foreach ( $config as $facadeClass => $from ) {
-			$this->uses = [];
-			$this->usesIndex = [];
+		if (false === ( $realpath = realpath($outputPath) )) {
+			throw new RuntimeException('OutputPath directory not found: ' . $outputPath);
+		}
 
-			// import container
-			$this->putUse($containerClass);
+		$this->outputPath = $realpath;
 
-			// add facade class to index
-			$this->putUseIndex($facadeClass);
+		return $this;
+	}
 
-			[
-				'class'     => $facadeClassName,
-				'namespace' => $facadeNamespace,
-				'path'      => $facadeNamespacePath,
-			] = $this->nsinfo($facadeClass);
 
-			// create php file
-			$file = $this->newPhpFile();
-			$file->addComment(implode(PHP_EOL, [
-				'This file is auto-generated.',
-				'',
-				'* @noinspection PhpUnhandledExceptionInspection',
-				'* @noinspection PhpDocMissingThrowsInspection',
-			]));
+	/**
+	 * @param array $config
+	 *
+	 * @return Facader
+	 */
+	public function setConfig(array $config)
+	{
+		$this->servicesConfig = [];
+		$this->facadesConfig = [];
 
-			// create namespace
-			$namespace = $file->addNamespace($facadeNamespace);
-			$namespace->add($facadeClassInstance = new ClassType($facadeClassName));
+		$this->mergeConfig($config);
 
-			// parse sources
-			$facadeMethods = [];
-			$fromArray = (array) $from;
+		return $this;
+	}
 
-			// merge methods
-			foreach ( $fromArray as $idx => $fromClass ) {
-				$fromInterface = is_string($idx)
-					? $idx
-					: null;
+	/**
+	 * @param array $config
+	 *
+	 * @return Facader
+	 */
+	public function mergeConfig(array $config)
+	{
+		$map = [];
+		$map[ 'services' ] = 'servicesConfig';
+		$map[ 'facades' ] = 'facadesConfig';
 
-				$fromClassInstance = $this->newClassTypeFrom($fromClass);
+		foreach ( [ 'services', 'facades' ] as $type ) {
+			$list = $config[ $type ] ?? [];
 
-				// imports
-				foreach ( $this->fetchUseStatements($fromClass) as $use ) {
-					$this->putUse(...array_values($use));
-				}
-
-				// remove magic methods
-				$fromClassInstance->removeMethod('__construct');
-				$fromClassInstance->removeMethod('__destruct');
-				$fromClassInstance->removeMethod('__call');
-				$fromClassInstance->removeMethod('__callStatic');
-				$fromClassInstance->removeMethod('__get');
-				$fromClassInstance->removeMethod('__set');
-				$fromClassInstance->removeMethod('__isset');
-				$fromClassInstance->removeMethod('__unset');
-				$fromClassInstance->removeMethod('__sleep');
-				$fromClassInstance->removeMethod('__wakeup');
-				$fromClassInstance->removeMethod('__toString');
-				$fromClassInstance->removeMethod('__invoke');
-				$fromClassInstance->removeMethod('__set_state');
-				$fromClassInstance->removeMethod('__clone');
-				$fromClassInstance->removeMethod('__debugInfo');
-
-				// remove protected
-				foreach ( $fromClassInstance->getMethods() as $method ) {
-					if ($method->isPublic()) {
-						continue;
+			foreach ( $list as $outputClass => $sources ) {
+				foreach ( $sources as $interface => $class ) {
+					if (! class_exists($class)) {
+						throw new InvalidArgumentException('Invalid class: ' . $class);
 					}
 
-					$fromClassInstance->removeMethod($method->getName());
+					if (is_string($interface)) {
+						if (! interface_exists($interface)) {
+							throw new InvalidArgumentException('Invalid interface: ' . $interface);
+						}
+
+						$this->{$map[ $type ]}[ $outputClass ][ $interface ] = $class;
+
+					} else {
+						$this->{$map[ $type ]}[ $outputClass ][] = $class;
+
+					}
 				}
-
-				$facadeMethods = array_merge($facadeMethods,
-					$this->fetchMethods($fromClassInstance,
-						$facadeClass,
-						$fromClass,
-						$fromInterface
-					)
-				);
 			}
-
-			// copy methods
-			foreach ( $fromArray as $idx => $fromClass ) {
-				$fromClassName = $this->className($fromClass);
-
-				$fromInterface = is_string($idx)
-					? $idx
-					: null;
-				$fromInterfaceName = $fromInterface
-					? $this->className($fromInterface)
-					: null;
-
-				$fromUse = $fromInterface ?? $fromClass;
-
-				if ($fromInterface) {
-					$fromAlias = null
-						?? ( ( $facadeClassName === $fromInterfaceName )
-							? '_' . $facadeClassName
-							: null )
-						?? $fromInterfaceName;
-
-				} else {
-					$fromAlias = null
-						?? ( ( $facadeClassName === $fromClassName )
-							? '_' . $facadeClassName
-							: null )
-						?? $fromClassName;
-
-				}
-
-				$this->putUse($fromUse, $fromAlias);
-
-				// add facade accessor
-				$facadeMethods[] = $method = ( new Method('get' . $fromClassName) )
-					->setPublic()
-					->setStatic()
-					->addComment('@return ' . $fromAlias)
-					->setBody(vsprintf('return %s::%s(%s::class);', [
-						$containerClassName,
-						$containerGetMethodName,
-						$fromAlias,
-					]));
-			}
-
-			// add new methods to facade class
-			$facadeClassInstance->setMethods($facadeMethods);
-
-			// add new uses
-			foreach ( $this->uses as $use ) {
-				$namespace->addUse(...$use);
-			}
-
-			$dir = $this->normalize($this->getFacadesRootPath()
-				. DIRECTORY_SEPARATOR . $facadeNamespacePath
-			);
-
-			// create dir
-			if (! $realpathDir = $this->is_dir($dir, false, true)) {
-				mkdir($dir, 0755, true);
-
-				$realpathDir = realpath($dir);
-			}
-
-			// save file
-			file_put_contents(
-				$realpathDir . DIRECTORY_SEPARATOR . $facadeClassName . '.php',
-				$this->newPsrPrinter()->printFile($file)
-			);
 		}
 
 		return $this;
@@ -289,542 +289,79 @@ class Facader
 
 
 	/**
-	 * @param ClassType   $classType
-	 * @param string      $facadeClass
-	 * @param string      $class
-	 * @param string|null $interface
+	 * @param string $containerClass
 	 *
-	 * @return array
+	 * @return Facader
 	 */
-	protected function fetchMethods(ClassType $classType,
-		string $facadeClass,
-		string $class,
-		string $interface = null
-	) : array
+	public function generate(string $containerClass)
 	{
-		$result = [];
+		$this->facades($containerClass, $this->facadesConfig);
+		$this->services($this->servicesConfig);
 
-		$namespace = $this->namespace($class);
-
-		$facadeClassName = $this->className($facadeClass);
-		$className = $this->className($class);
-		$interfaceName = $interface
-			? $this->className($interface)
-			: null;
-
-		if ($interface) {
-			$fromAlias = null
-				?? ( ( $facadeClassName === $interfaceName )
-					? '_' . $facadeClassName
-					: null )
-				?? $interfaceName;
-
-		} else {
-			$fromAlias = null
-				?? ( ( $facadeClassName === $className )
-					? '_' . $facadeClassName
-					: null )
-				?? $className;
-
-		}
-
-		foreach ( $classType->getMethods() as $method ) {
-			// replace methods visibility to static
-			$method->setStatic();
-
-			// replace @return in PhpDoc
-			$commentReturnType = null;
-			if ($comment = $method->getComment()) {
-				$content = array_map("trim", explode("\n", $comment));
-
-				foreach ( $content as $idx => $line ) {
-					if ($after = $this->substr_after($line, '@return')) {
-						$after = trim($after);
-
-						$begins = null;
-						$ends = null;
-						if (0
-							|| ( $after === '$this' )
-							|| ( $after === 'self' )
-							|| ( $after === 'static' )
-							|| ( $after === $className )
-							|| ( $begins = $this->starts($after, $className . '|') )
-							|| ( $ends = $this->ends($after, '|' . $className) )
-						) {
-							$content[ $idx ] = '@return '
-								. trim(''
-									. $begins . '|'
-									. $fromAlias
-									. '|' . $ends,
-									'|'
-								);
-
-						} else {
-							$commentReturnType = null
-								?? ( class_exists($after)
-									? $after
-									: null )
-								?? ( class_exists($after = $namespace . '\\' . $after)
-									? $after
-									: null );
-
-						}
-					}
-				}
-
-				$method->setComment(implode(PHP_EOL, $content));
-			}
-
-			// add use for return type
-			$returnType = $method->getReturnType() ?? $commentReturnType;
-			if ($returnType && class_exists($returnType)) {
-				$this->putUse($returnType);
-			}
-
-			// replace return command into expected
-			switch ( true ):
-				case ( $returnType === 'void' ):
-					$returnCmd = '';
-					break;
-
-				case ( $returnType === \Generator::class ):
-				case ( is_a($returnType, \Generator::class) === 'void' ):
-					$returnCmd = 'yield ';
-					break;
-
-				default:
-					$returnCmd = 'return ';
-					break;
-
-			endswitch;
-
-			$params = $this->fetchMethodParams($class, $method);
-
-			$method->setBody(
-				vsprintf(''
-					. '%s'
-					. 'static::get%s()'
-					. '->%s(%s);'
-					, [
-						$returnCmd,
-						$className,
-						$method->getName(),
-						implode(', ', $params),
-					])
-			);
-
-			$result[] = $method;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * @param string $class
-	 * @param Method $method
-	 *
-	 * @return array
-	 */
-	protected function fetchMethodParams(string $class, Method $method) : array
-	{
-		$result = [];
-
-		foreach ( $method->getParameters() as $param ) {
-			$paramType = $param->getType();
-
-			if ($paramType && class_exists($paramType)) {
-				$this->putUse($paramType);
-			}
-
-			try {
-				$rm = new \ReflectionMethod($class, $method->getName());
-			}
-			catch ( \ReflectionException $e ) {
-				throw new \RuntimeException(null, null, $e);
-			}
-
-			$isVariadic = false;
-			foreach ( $rm->getParameters() as $rp ) {
-				if ($rp->getName() !== $param->getName()) {
-					continue;
-				}
-
-				$isVariadic = $rp->isVariadic();
-			}
-
-			$result[] = vsprintf('%s$%s', [
-				$isVariadic
-					? '...'
-					: '',
-				$param->getName(),
-			]);
-		}
-
-		return $result;
+		return $this;
 	}
 
 
 	/**
-	 * @param string $class
+	 * @param string $serviceClass
+	 * @param mixed  ...$sources
 	 *
-	 * @return array
+	 * @return Facader
 	 */
-	protected function fetchUseStatements(string $class) : array
+	public function service(string $serviceClass, ...$sources)
 	{
-		try {
-			$rc = new ExtendedReflectionClass($class);
-		}
-		catch ( \ReflectionException $e ) {
-			throw new \RuntimeException(null, null, $e);
+		[ $classes, $interfaces ] = $this->php->kwparams(...$sources);
+
+		$this->newServiceGenerator($serviceClass, array_merge($classes, $interfaces))
+			->generate();
+
+		return $this;
+	}
+
+	/**
+	 * @param mixed ...$sourcesByClassName
+	 *
+	 * @return Facader
+	 */
+	public function services(array $sourcesByClassName)
+	{
+		foreach ( $sourcesByClassName as $outputClass => $sources ) {
+			$this->service($outputClass, $sources);
 		}
 
-		$result = $rc->getUseStatements();
-
-		return $result;
+		return $this;
 	}
 
 
 	/**
-	 * @param string $use
-	 * @param null   $as
+	 * @param string $containerClass
+	 * @param string $facadeClass
+	 * @param mixed  ...$sources
 	 *
-	 * @return string
+	 * @return $this
 	 */
-	protected function putUse(string $use, $as = null) : string
+	public function facade(string $containerClass, string $facadeClass, ...$sources)
 	{
-		if (! isset($as)) {
-			$array = explode('\\', $use);
+		[ $classes, $interfaces ] = $this->php->kwparams(...$sources);
 
-			$as = array_pop($array);
-		}
+		$this->newFacadeGenerator($containerClass, $facadeClass, array_merge($classes, $interfaces))
+			->generate();
 
-		try {
-			$rc = new \ReflectionClass($use);
-
-			if (! $rc->isUserDefined()) {
-				return $as;
-			}
-		}
-		catch ( \ReflectionException $exception ) {
-			throw new \RuntimeException(null, null, $exception);
-		}
-
-		$as = $this->putUseIndex($use, $as);
-
-		$this->uses[] = [ $use, $as ];
-
-		return $as;
+		return $this;
 	}
 
 	/**
-	 * @param string $use
-	 * @param null   $as
+	 * @param string $containerClass
+	 * @param mixed  ...$sourcesByClassName
 	 *
-	 * @return string
+	 * @return $this
 	 */
-	protected function putUseIndex(string $use, $as = null) : string
+	public function facades(string $containerClass, array $sourcesByClassName)
 	{
-		if (! isset($as)) {
-			$array = explode('\\', $use);
-
-			$as = array_pop($array);
+		foreach ( $sourcesByClassName as $outputClass => $sources ) {
+			$this->facade($containerClass, $outputClass, $sources);
 		}
 
-		$existingUses = $this->usesIndex[ $as ] ?? null;
-
-		if ($existingUses) {
-			if (! isset($existingUses[ $use ])) {
-				++$this->usesCounter[ $as ];
-			}
-
-		} else {
-			$this->usesCounter[ $as ] = 0;
-
-		}
-
-		$this->usesIndex[ $as ][ $use ] = true;
-
-		$i = $this->usesCounter[ $as ];
-
-		$result = $as . ( $i
-				? $i
-				: '' );
-
-		return $result;
-	}
-
-
-	/**
-	 * @param mixed $needle
-	 *
-	 * @return array
-	 */
-	protected function nsinfo($needle) : array
-	{
-		if (! ( is_object($needle) || is_string($needle) )) {
-			throw new \InvalidArgumentException();
-		}
-
-		if (is_object($needle)) {
-			$class = get_class($needle);
-
-		} elseif (is_string($needle)) {
-			$class = $needle;
-
-		} else {
-			throw new \InvalidArgumentException();
-
-		}
-
-		$namespace = explode('\\', $class);
-
-		$class = array_pop($namespace);
-		$namespace = ltrim(implode('\\', $namespace), '\\');
-
-		$path = $this->normalize($namespace);
-
-		return [
-			'path'      => $path,
-			'class'     => $class,
-			'namespace' => $namespace,
-		];
-	}
-
-
-	/**
-	 * @param mixed $needle
-	 *
-	 * @return string
-	 */
-	protected function className($needle) : string
-	{
-		return $this->nsinfo($needle)[ 'class' ];
-	}
-
-	/**
-	 * @param mixed $needle
-	 *
-	 * @return string
-	 */
-	protected function namespace($needle) : string
-	{
-		return $this->nsinfo($needle)[ 'namespace' ];
-	}
-
-	/**
-	 * @param mixed $needle
-	 *
-	 * @return string
-	 */
-	protected function namespacePath($needle) : string
-	{
-		return $this->nsinfo($needle)[ 'path' ];
-	}
-
-
-	/**
-	 * @param string $path
-	 *
-	 * @return string
-	 */
-	protected function normalize(string $path = '') : string
-	{
-		return $this->optimize($path, DIRECTORY_SEPARATOR);
-	}
-
-	/**
-	 * @param string $path
-	 * @param string $separator
-	 *
-	 * @return mixed
-	 */
-	protected function optimize(string $path = '', string $separator = '/') : string
-	{
-		if ('' === $path) {
-			return '';
-		}
-
-		if (false !== strpos($path, "\0")) {
-			throw new \InvalidArgumentException('Invalid path passed: ' . $path);
-		}
-
-		$result = $path;
-		$result = implode("\0", explode($separator, $result));
-		$result = implode("\0", explode('/', $result));
-		$result = implode("\0", explode('\\', $result));
-		$result = implode("\0", explode(DIRECTORY_SEPARATOR, $result));
-
-		$result = implode($separator, explode("\0", $result));
-
-		return $result;
-	}
-
-
-	/**
-	 * @param string $haystack
-	 * @param string $needle
-	 *
-	 * @return null|string
-	 */
-	protected function starts(string $haystack, string $needle = '') : ?string
-	{
-		if ('' === $needle) return $haystack;
-		if ('' === $haystack) return null;
-
-		$result = ( 0 === mb_stripos($haystack, $needle) )
-			? mb_substr($haystack, mb_strlen($needle))
-			: null;
-
-		return $result;
-	}
-
-	/**
-	 * @param string $haystack
-	 * @param string $needle
-	 *
-	 * @return string
-	 */
-	protected function ends(string $haystack, string $needle = '') : ?string
-	{
-		if ('' === $needle) return $haystack;
-		if ('' === $haystack) return null;
-
-		$result = ( ( $pos = ( mb_strlen($haystack) - mb_strlen($needle) ) ) === mb_strripos($haystack, $needle) )
-			? mb_substr($haystack, 0, mb_strlen($haystack) - mb_strlen($needle))
-			: null;
-
-		return $result;
-	}
-
-	/**
-	 * @param string $haystack
-	 * @param string $needle
-	 *
-	 * @return null|string
-	 */
-	protected function substr_after(string $haystack, string $needle = '') : ?string
-	{
-		if ('' === $needle) return $haystack;
-
-		$result = ( false !== ( $pos = mb_stripos($haystack, $needle) ) )
-			? mb_substr($haystack, $pos + mb_strlen($needle))
-			: null;
-
-		return $result;
-	}
-
-
-	/**
-	 * @param           $fileName
-	 * @param bool|null $caseSensitive
-	 * @param bool|null $multibyte
-	 *
-	 * @return string|null
-	 */
-	protected function is_dir($fileName, bool $caseSensitive = null, bool $multibyte = null) : ?string
-	{
-		$caseSensitive = $caseSensitive ?? true;
-		$multibyte = $multibyte ?? false;
-
-		if (is_dir($fileName)) {
-			return realpath($fileName);
-		}
-
-		if ($caseSensitive) {
-			return null;
-		}
-
-		$files = $this->glob($fileName, null, $multibyte);
-
-		foreach ( $files as $file ) {
-			if ($multibyte) {
-				$lFile = mb_strtolower($file);
-				$lFileName = mb_strtolower($fileName);
-
-			} else {
-				$lFile = strtolower($file);
-				$lFileName = strtolower($fileName);
-
-			}
-
-			if ($lFile !== $lFileName) {
-				continue;
-			}
-
-			if (! is_dir($file)) {
-				return null;
-			}
-
-			return realpath($file);
-		}
-
-		return null;
-	}
-
-
-	/**
-	 * @param string   $pattern
-	 * @param int|null $flags
-	 * @param string   $dir
-	 * @param bool     $multibyte
-	 *
-	 * @return array|false
-	 */
-	protected function glob(string $pattern, int $flags = null, string $dir = null, bool $multibyte = false) : ?array
-	{
-		if ('' === $pattern) {
-			throw new \InvalidArgumentException('Pattern should be not empty', func_get_args());
-		}
-
-		if ($dir && ( '' === $dir )) {
-			throw new \InvalidArgumentException('Dir should be not empty');
-		}
-
-		$len = $multibyte
-			? mb_strlen($pattern)
-			: strlen($pattern);
-
-		$p = '';
-		for ( $i = 0; $i < $len; $i++ ) {
-			if ($multibyte) {
-				$u = mb_strtoupper($pattern[ $i ]);
-				$l = mb_strtolower($pattern[ $i ]);
-
-			} else {
-				$u = strtoupper($pattern[ $i ]);
-				$l = strtolower($pattern[ $i ]);
-
-			}
-
-			if ($u === $l) {
-				$p .= $pattern[ $i ];
-
-			} else {
-				$p .= "[{$l}{$u}]";
-
-			}
-		}
-
-		if ($dir) {
-			$p = $dir . DIRECTORY_SEPARATOR . $p;
-		}
-
-		$files = glob($p, $flags);
-
-		if (( $flags & GLOB_NOCHECK )
-			&& ( ! is_array($files) )
-		) {
-			return $files;
-		}
-
-		if (( ! ( $flags & GLOB_NOSORT ) )
-			&& is_array($files)
-		) {
-			usort($files, function ($a, $b) {
-				return is_dir($a) - is_dir($b);
-			});
-		}
-
-		return $files;
+		return $this;
 	}
 }

@@ -10,19 +10,12 @@
 namespace Facades;
 
 use Gzhegow\Di\Di;
-use Tests\Services\SecondaryService;
-use Tests\Services\Service as _Service;
+use Gzhegow\Facader\Tests\Services\SecondaryService;
+use Gzhegow\Facader\Tests\Services\SecondaryServiceInterface;
+use Gzhegow\Facader\Tests\Services\Service;
 
-class Service
+class ServiceFacade
 {
-    /**
-     * @return SecondaryService
-     */
-    public static function getSecondaryService()
-    {
-        return static::getService()->getSecondaryService();
-    }
-
     /**
      * @param \StdClass $stdClass
      *
@@ -34,7 +27,15 @@ class Service
     }
 
     /**
-     * @return _Service
+     * @return SecondaryServiceInterface
+     */
+    public static function getSecondaryService()
+    {
+        return Di::getInstance()->get(SecondaryServiceInterface::class);
+    }
+
+    /**
+     * @return Service
      */
     public static function doActionThis()
     {
@@ -42,7 +43,7 @@ class Service
     }
 
     /**
-     * @return _Service
+     * @return Service
      */
     public static function doActionSelf()
     {
@@ -50,7 +51,7 @@ class Service
     }
 
     /**
-     * @return _Service
+     * @return Service
      */
     public static function doActionStatic()
     {
@@ -58,7 +59,7 @@ class Service
     }
 
     /**
-     * @return _Service
+     * @return Service
      */
     public static function doActionClassName()
     {
@@ -66,7 +67,7 @@ class Service
     }
 
     /**
-     * @return _Service
+     * @return Service
      */
     public static function doActionInterfaceName()
     {
@@ -74,7 +75,7 @@ class Service
     }
 
     /**
-     * @return mixed|_Service
+     * @return mixed|Service
      */
     public static function doActionBeginsClassName()
     {
@@ -82,7 +83,7 @@ class Service
     }
 
     /**
-     * @return _Service|mixed
+     * @return Service|mixed
      */
     public static function doActionEndsInterfaceName()
     {
@@ -90,10 +91,10 @@ class Service
     }
 
     /**
-     * @return _Service
+     * @return Service
      */
     public static function getService()
     {
-        return Di::makeOrFail(_Service::class);
+        return Di::getInstance()->get(Service::class);
     }
 }

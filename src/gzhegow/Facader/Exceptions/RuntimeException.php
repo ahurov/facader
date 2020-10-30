@@ -2,6 +2,8 @@
 
 namespace Gzhegow\Facader\Exceptions;
 
-class RuntimeException extends \RuntimeException
+use Gzhegow\Support\Exceptions\RuntimeException as SupportRuntimeException;
+
+class RuntimeException extends SupportRuntimeException
 {
 }

@@ -2,6 +2,8 @@
 
 namespace Gzhegow\Facader\Exceptions;
 
-class Exception extends \Exception
+use Gzhegow\Support\Exceptions\Exception as SupportException;
+
+class Exception extends SupportException
 {
 }

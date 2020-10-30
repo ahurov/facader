@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Services;
+namespace Gzhegow\Facader\Tests\Services;
 
 /**
  * Class Service

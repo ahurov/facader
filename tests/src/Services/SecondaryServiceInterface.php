@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Services;
+namespace Gzhegow\Facader\Tests\Services;
 
 /**
- * Class ServiceInterface
+ * Class SecondaryServiceInterface
  */
-interface ServiceInterface
+interface SecondaryServiceInterface
 {
 	/**
 	 * @param \StdClass $stdClass

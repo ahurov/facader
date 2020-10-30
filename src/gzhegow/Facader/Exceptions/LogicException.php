@@ -2,6 +2,8 @@
 
 namespace Gzhegow\Facader\Exceptions;
 
-class LogicException extends \LogicException
+use Gzhegow\Support\Exceptions\LogicException as SupportLogicException;
+
+class LogicException extends SupportLogicException
 {
 }
