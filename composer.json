@@ -8,22 +8,6 @@
             "email": "6562680@gmail.com"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/6562680/support"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/6562680/reflection"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/6562680/di"
-        }
-    ],
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "require": {
         "php": "^7.3",
         
