@@ -20,7 +20,6 @@ class FacaderTest extends AbstractTestCase
 	protected function setUp() : void
 	{
 		parent::setUp();
-		return;
 
 		$facader = $this->getFacader();
 
@@ -111,9 +110,6 @@ class FacaderTest extends AbstractTestCase
 	 */
 	protected function tearDown() : void
 	{
-		parent::tearDown();
-		return;
-
 		$facader = $this->getFacader();
 
 		$outputPath = $facader->getOutputPath();

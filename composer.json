@@ -1,6 +1,6 @@
 {
     "name": "gzhegow/facader",
-    "description": "Static facades generator",
+    "description": "Services and Static Facades merger && generator",
     "type": "library",
     "authors": [
         {

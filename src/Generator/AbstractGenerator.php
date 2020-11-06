@@ -170,7 +170,7 @@ abstract class AbstractGenerator
 
 		$subdir = $this->generatedClassNamespace
 			? $this->path->normalize($this->generatedClassNamespace)
-			: null;
+			: '';
 
 		$dir = $this->path->join(
 			$this->facader->getOutputPath(),

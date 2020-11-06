@@ -32,8 +32,8 @@ class FacaderProvider extends DeferableProvider
 	protected function define() : array
 	{
 		return [
-			'config'    => __DIR__ . '/../../../../config/facader.php',
-			'resources' => __DIR__ . '/../../../../storage/resources/facader/',
+			'config'    => __DIR__ . '/../../config/facader.php',
+			'resources' => __DIR__ . '/../../storage/resources/facader/',
 		];
 	}
 }
