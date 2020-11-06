@@ -24,7 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Gzhegow\\Facader\\": "src/gzhegow/Facader"
+            "Gzhegow\\Facader\\": "src"
         }
     },
     "autoload-dev": {
